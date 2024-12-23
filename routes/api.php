@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MedicamentController;
+use App\Http\Controllers\MoleculeController;
 use App\Http\Controllers\PermissionController;
 
 Route::get('/', function () {
@@ -11,6 +12,7 @@ Route::get('/', function () {
 });
 
 Route::post('/login', [AuthController::class, 'login']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::put('/logout', [AuthController::class, 'logout']);
 
@@ -43,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/medicaments/{id}', [MedicamentController::class, 'update']);
     Route::delete('/medicaments/{id}', [MedicamentController::class, 'destroy']);
     Route::post('/medicaments/import', [MedicamentController::class, 'importCsv']);;
+
+
+    Route::post('/molecules/search',[MoleculeController::class, 'searchMolecule']);
+    Route::post('/molecules/interactions',[MoleculeController::class, 'checkInteractions']);
 });
 
 // Password reset

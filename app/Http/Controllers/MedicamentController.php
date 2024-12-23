@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Medicament;
 use Illuminate\Http\Request;
 use App\Imports\MedicamentImport;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MedicamentController extends Controller
@@ -13,6 +14,7 @@ class MedicamentController extends Controller
     public function index(Request $request)
     {
         $query = Medicament::query();
+        Log::info($request->all());
 
         // Recherche par mot-clé (nom du produit ou DCI)
         if ($request->has('search') && !empty($request->search)) {
@@ -23,6 +25,7 @@ class MedicamentController extends Controller
         // Filtrer par voie d'administration
         if ($request->has('voie') && !empty($request->voie)) {
             $query->where('voie_administration', $request->voie);
+            //dd($query);
         }
 
         // Filtrer par type
@@ -45,10 +48,27 @@ class MedicamentController extends Controller
             $query->where('pays', $request->pays);
         }
 
-        // Pagination
-        $medicaments = $query->paginate($request->get('per_page', 15));
+        Log::info($query->toSql());
 
-        return response()->json($medicaments);
+        // Pagination
+        $medicaments = $query->paginate($request->get('per_page', 6));
+        $laboratoires = Medicament::distinct()->pluck('laboratoire');
+        $voies = Medicament::distinct()->pluck('voie_administration');
+        $formes = Medicament::distinct()->pluck('forme');
+        $pays = Medicament::distinct()->pluck('pays');
+
+        return response()->json([
+            'medicaments' => $medicaments,
+            'laboratoires' => $laboratoires,
+            'voies' => $voies,
+            'formes' => $formes,
+            'pays' => $pays,
+        ]);
+
+
+
+
+        //return response()->json($medicaments);
     }
 
     // Récupérer un médicament par son ID
@@ -86,7 +106,8 @@ class MedicamentController extends Controller
         ]);
 
         $medicament = Medicament::create($request->all());
-
+        // Récupérer les valeurs distinctes des colonnes
+      
         return response()->json(['message' => 'Médicament créé avec succès', 'data' => $medicament], 201);
     }
 
